@@ -24,7 +24,7 @@ const MovieDetails = () => {
         dateTime: dummyDateTimeData
       })
     }
-   
+
   }
   useEffect(() => {
     getShow()

@@ -5,6 +5,7 @@ import { MenuIcon, SearchIcon, TicketPlus, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 
+
 const Navbar = () => {
 
   const [isOpen, setIsOpen] = useState(false)
@@ -28,7 +29,11 @@ const Navbar = () => {
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Home</Link>
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/movies'>Movies</Link>
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Theaters</Link>
+        <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Releases</Link>
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/favorite'>Favorites</Link>
+        <button onClick={()=>navigate('/login')} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>
+          Login
+        </button>
       </div>
       <div className='flex items-center gap-8'>
         <SearchIcon className='max-md:hidden w-6 h-6 cursor-pointer'/>
@@ -37,6 +42,7 @@ const Navbar = () => {
             <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>
           Login
         </button>
+        
           ) : (
             <UserButton>
               <UserButton.MenuItems>

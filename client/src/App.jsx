@@ -14,6 +14,7 @@ import Dashboard from './pages/admin/Dashboard'
 import Addshows from './pages/admin/Addshows'
 import ListShows from './pages/admin/ListShows'
 import ListBookings from './pages/admin/ListBookings'
+import Login from './components/Login'
 
 const App = () => {
 
@@ -26,6 +27,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/movies' element={<Movies />} />
+        <Route path='/login' element={<Login />} />
         <Route path='/movies/:id' element={<MovieDetails />} />
         <Route path='/movies/:id/:date' element={<SeatLayout />} />
         <Route path='/my-bookings' element={<MyBookings />} />
