@@ -18,7 +18,7 @@ const syncUserCreation = inngest.createFunction(
             image: image_url
 
         }
-        await User.create(userData);
+        await User.create(userData)
     }
 )
 
@@ -27,8 +27,8 @@ const syncUserDeletion = inngest.createFunction(
     { id: 'delete-user-with-clerk' },
     { event: 'clerk/user.deleted' },
     async ({ event }) => {
-      const { id } = event.data;
-      await User.findByIdAndDelete(id);
+      const { id } = event.data
+      await User.findByIdAndDelete(id)
     }
   );
 
@@ -37,7 +37,7 @@ const syncUserUpdation = inngest.createFunction(
     { id: 'update-user-from-clerk' },
     { event: 'clerk/user.updated' },
     async ({ event }) => {
-      const { id, first_name, last_name, email_addresses, image_url } = event.data;
+      const { id, first_name, last_name, email_addresses, image_url } = event.data
   
       const userData = {
         _id: id,
@@ -46,7 +46,7 @@ const syncUserUpdation = inngest.createFunction(
         image: image_url,
       };
   
-      await User.findByIdAndUpdate(id, userData);
+      await User.findByIdAndUpdate(id, userData)
     }
   );
 

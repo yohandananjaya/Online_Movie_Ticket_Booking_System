@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - network
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: server
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      
+      - MONGODB_URI=mongodb://mongodb:27017/moviedb
+    depends_on:
+      - mongodb
+    networks:
+      - network
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+    environment:
+      # 👇 This must be localhost for browser requests
+      - VITE_APP_BACKEND_ADDRESS=http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - network
+
+volumes:
+  mongodb_data:
+    name: movie-booking-mongodb-data
+
+networks:
+  network:
+    driver: bridge
