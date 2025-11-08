@@ -11,6 +11,7 @@ export const AppProvider = ({children}) => {
     const [favoriteMovies, setFavoriteMovies] = useState([])
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(null)
+    const [initialized, setInitialized] = useState(false)
     const navigate = useNavigate()
 
     const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
@@ -86,15 +87,17 @@ export const AppProvider = ({children}) => {
 
         useEffect(()=>{
                 // rehydrate token from storage and set axios auth header
-                try{
-                    const t = localStorage.getItem('token')
-                    if(t){
-                        setToken(t)
-                        axios.defaults.headers.common['Authorization'] = `Bearer ${t}`
-                    } else {
-                        delete axios.defaults.headers.common['Authorization']
-                    }
-                }catch{}
+                        try{
+                            const t = localStorage.getItem('token')
+                            if(t){
+                                setToken(t)
+                                axios.defaults.headers.common['Authorization'] = `Bearer ${t}`
+                            } else {
+                                delete axios.defaults.headers.common['Authorization']
+                            }
+                        }catch{}
+                        // mark rehydration finished
+                        setInitialized(true)
         },[])
 
         useEffect(()=>{
@@ -106,7 +109,7 @@ export const AppProvider = ({children}) => {
                 }
         },[token])
 
-    const value = {axios,shows,favoriteMovies,fetchFavoriteMovies,user,token,login,register,logout,image_base_url}
+    const value = {axios,shows,favoriteMovies,fetchFavoriteMovies,user,token,login,register,logout,image_base_url,initialized}
     return <AppContext.Provider value={value}>
         {children}
     </AppContext.Provider>

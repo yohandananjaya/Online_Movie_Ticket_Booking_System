@@ -1,7 +1,9 @@
 import React from 'react'
 import Navbar from './components/Navbar'
 import  Home  from './pages/Home'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import Loading from './components/Loading'
+import { useAppContext } from './context/Appcontext'
 import MovieDetails from './pages/MovieDetails'
 import SeatLayout from './pages/SeatLayout'
 import MyBookings from './pages/MyBookings'
@@ -17,6 +19,14 @@ import ListBookings from './pages/admin/ListBookings'
 import Login from './components/Login'
 
 
+const PrivateRoute = ({children}) => {
+  const { token, initialized } = useAppContext()
+  const location = useLocation()
+  if(!initialized) return <Loading />
+  if(!token) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  return children
+}
+
 const App = () => {
 
   const isAsminRoute = useLocation().pathname.startsWith('/admin');
@@ -30,8 +40,8 @@ const App = () => {
         <Route path='/movies' element={<Movies />} />
         <Route path='/login' element={<Login />} />
         <Route path='/movies/:id' element={<MovieDetails />} />
-        <Route path='/movies/:id/:date' element={<SeatLayout />} />
-        <Route path='/my-bookings' element={<MyBookings />} />
+        <Route path='/movies/:id/:date' element={<PrivateRoute><SeatLayout /></PrivateRoute>} />
+        <Route path='/my-bookings' element={<PrivateRoute><MyBookings /></PrivateRoute>} />
         <Route path='/favorite' element={<Favorite />} />
         <Route path='/admin/*' element={<Layout/> }>
           <Route index element ={<Dashboard/>}/>
