@@ -131,3 +131,21 @@ export const getShow = async (req, res) => {
     res.json({ success: false, message: "Failed to fetch show details" });
   }
 }
+
+// API to get trailers for a movie (YouTube keys via TMDB)
+export const getMovieTrailers = async (req, res) => {
+  try {
+    const { movieId } = req.params
+    const { data } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
+      headers: {
+        Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+      },
+    })
+    const results = data?.results || []
+    const trailers = results.filter(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'))
+    res.json({ success: true, trailers })
+  } catch (error) {
+    console.error(error)
+    res.json({ success: false, message: 'Failed to fetch trailers' })
+  }
+}

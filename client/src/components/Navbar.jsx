@@ -3,21 +3,20 @@ import { Link, useNavigate } from 'react-router-dom'
 import {assets} from '../assets/assets'
 import { MenuIcon, SearchIcon, TicketPlus, XIcon } from 'lucide-react'
 import { useState } from 'react'
-import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
+import { useAppContext } from '../context/Appcontext'
 
 
 const Navbar = () => {
 
   const [isOpen, setIsOpen] = useState(false)
-  const {user} = useUser()
-  const {openSignIn} = useClerk()
+  const {user, logout} = useAppContext()
 
   const navigate = useNavigate()
 
   return (
     <div className='fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-16 lg:px-36 py-5'>
       <Link to='/'className='max-md:flex-1'>
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight -mt-1 md:-mt-2">
   <span className="text-red-600">S</span>howTix
 </h1>
 
@@ -31,8 +30,7 @@ const Navbar = () => {
         
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Home</Link>
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/movies'>Movies</Link>
-        <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Theaters</Link>
-        <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/'>Releases</Link>
+       
         <Link onClick={()=>{scrollTo(0,0);setIsOpen(false)}} to='/favorite'>Favorites</Link>
         
       </div>
@@ -40,18 +38,16 @@ const Navbar = () => {
         <SearchIcon className='max-md:hidden w-6 h-6 cursor-pointer'/>
         {
           !user ? (
-            <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>
-          Login
-        </button>
-        
+            <button onClick={()=> navigate('/login')} className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer'>
+              Login
+            </button>
           ) : (
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Action label="My Bookings" labelIcon=
-                {<TicketPlus width={15}/>} onClick={()=> navigate('/my-bookings')}/>
-              </UserButton.MenuItems>              
-            </UserButton>
-
+            <div className='flex items-center gap-4'>
+              <button onClick={()=> navigate('/my-bookings')} className='text-sm flex items-center gap-1 border border-gray-500 rounded-full px-3 py-1'>
+                <TicketPlus width={15}/> My Bookings
+              </button>
+              <button onClick={logout} className='px-3 py-1 bg-white/10 rounded-full'>Logout</button>
+            </div>
           )
         }
         

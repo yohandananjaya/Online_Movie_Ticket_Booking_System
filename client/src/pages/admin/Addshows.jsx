@@ -1,20 +1,44 @@
 import React, { useEffect, useState } from 'react'
-import { dummyShowsData } from '../../assets/assets';
+// Removed dummyShowsData; now using live data from API
 import Loading from '../../components/Loading';
 import Title from '../../components/admin/Title';
 import { CheckIcon, DeleteIcon, StarIcon } from 'lucide-react';
 import { kConverter } from '../../lib/kConverter';
+import { useAppContext } from '../../context/Appcontext';
 
 const Addshows = () => {
+
+  const {axios,user,image_base_url}= useAppContext();
     const currency = import.meta.env.VITE_CURRENCY 
-    const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
-    const [selectedMovie, setSelectedMovie] = useState(null);
-    const [dateTimeSelection, setDateTimeSelection] = useState({});
-    const [dateTimeInput, setDateTimeInput] = useState("");
-    const [showPrice, setShowPrice] = useState("");
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [dateTimeSelection, setDateTimeSelection] = useState({});
+  const [dateTimeInput, setDateTimeInput] = useState("");
+  const [showPrice, setShowPrice] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
     const fetchNowPlayingMovies = async () => {
-      setNowPlayingMovies(dummyShowsData);
+      setIsLoading(true);
+      setError("");
+      try {
+        const {data} = await axios.get('/api/show/now-playing')
+        if(data.success){
+          setNowPlayingMovies(data.movies || []);
+        } else {
+          setError(data.message || 'Failed to fetch movies');
+        }
+      } catch (err) {
+        console.error("Error fetching now playing movies:", err);
+        // Helpful hint for common misconfiguration: missing VITE_BASE_URL
+        if(!import.meta.env.VITE_BASE_URL){
+          setError('Missing VITE_BASE_URL env var. Create a .env file with VITE_BASE_URL=http://localhost:5000');
+        } else {
+          setError('Unable to load now playing movies. Check server & API key.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     const handleDateTimeAdd = () => {
@@ -49,6 +73,36 @@ const Addshows = () => {
       fetchNowPlayingMovies();
     }, []);
 
+    const onAddShow = async ()=>{
+      try{
+        if(!selectedMovie) return alert('Select a movie')
+        if(!showPrice) return alert('Enter show price')
+        if(Object.keys(dateTimeSelection).length===0) return alert('Add at least one date/time')
+        const showsInput = Object.entries(dateTimeSelection).map(([date,times])=>({date, time: times}))
+        const {data} = await axios.post('/api/show/add',{movieId: selectedMovie, showsInput, showPrice: Number(showPrice)})
+        if(data.success){
+          alert('Shows added')
+        }else{
+          alert(data.message||'Failed to add shows')
+        }
+      }catch(err){
+        console.error(err)
+        alert('Failed to add shows')
+      }
+    }
+
+    if(isLoading){
+      return <Loading />
+    }
+    if(error){
+      return (
+        <div className='space-y-4'>
+          <Title text1="Add" text2="Shows" />
+          <p className='text-red-400 text-sm'>{error}</p>
+          <button onClick={fetchNowPlayingMovies} className='bg-primary/80 text-white px-4 py-2 rounded text-sm'>Retry</button>
+        </div>
+      )
+    }
     return nowPlayingMovies.length > 0 ? (
     <>
       <Title text1="Add" text2="Shows"/>
@@ -58,7 +112,7 @@ const Addshows = () => {
         {nowPlayingMovies.map((movie) => (
           <div key={movie.id} className={`relative max-w-40 cursor-pointer group-hover:not-hover:opacity-40 hover:-translate-y-1 transition duration-300`} onClick={()=>setSelectedMovie(movie.id)}>
             <div className='relative rounded-lg overflow-hidden '>
-                <img src={movie.poster_path} alt="" className='w-full object-cover brightness-90' /> 
+                <img src={`${image_base_url}${movie.poster_path}`} alt={movie.title || movie.Title} className='w-full object-cover brightness-90' /> 
                 <div className='text-sm flex items-center justify-between p-2 bg-black/70 w-full absolute bottom-0 left-0'>
                 <p className='flex items-center gap-1 text-gray-400'>
                   <StarIcon className='w-4 h-4 text-primary fill-primary' /> {movie.vote_average.toFixed(1)}
@@ -71,7 +125,7 @@ const Addshows = () => {
                 <CheckIcon className='w-4 h-4 text-white' strokeWidth={2.5}/>
               </div>
                ) }
-               <p className='font-medium truncate'>{movie.Title}</p>
+               <p className='font-medium truncate'>{movie.title || movie.Title}</p>
                 <p className='text-sm text-gray-400'>{movie.release_date}</p>
           </div>
         ))}
@@ -139,12 +193,19 @@ const Addshows = () => {
   </div>
 )}
 <button
+  onClick={onAddShow}
   className="bg-primary text-white px-8 py-2 mt-6 rounded hover:bg-primary/90 transition-all cursor-pointer"
 >
   Add Show
 </button>
     </>
-  ) : <Loading  />;
+  ) : (
+    <div>
+      <Title text1="Add" text2="Shows" />
+      <p className='mt-6 text-sm text-gray-400'>No movies available yet. Ensure your server is running and TMDB API key is configured. </p>
+      <button onClick={fetchNowPlayingMovies} className='bg-primary/80 mt-4 text-white px-4 py-2 rounded text-sm'>Refresh</button>
+    </div>
+  );
 }
 
 export default Addshows

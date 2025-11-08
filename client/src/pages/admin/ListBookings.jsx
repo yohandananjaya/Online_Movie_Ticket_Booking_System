@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { dummyBookingData } from '../../assets/assets';
+// Removed dummyBookingData; fetch real data from API
 import Loading from '../../components/Loading';
 import Title from '../../components/admin/Title';
 import { dateFormat } from '../../lib/dateFormat';
+import { useAppContext } from '../../context/Appcontext';
 
 const ListBookings = () => {
 
@@ -10,10 +11,17 @@ const ListBookings = () => {
 
   const [bookings, setBookings] = useState([]);
   const [isLoading,setLoading] = useState(true);
+  const { axios } = useAppContext();
 
   const getAllBookings = async () => {
-    setBookings(dummyBookingData)
-    setLoading(false);
+    try{
+      const { data } = await axios.get('/api/admin/all-bookings')
+      if(data.success){
+        setBookings(data.bookings || [])
+      }
+    } finally {
+      setLoading(false)
+    }
   };
   useEffect(() => {
     getAllBookings();

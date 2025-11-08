@@ -1,17 +1,20 @@
-import { clerkClient } from "@clerk/express";
+import jwt from 'jsonwebtoken'
 
-export const protectAdmin = async (req, res, next) => {
-  try {
-    const { userId } = req.auth();
-
-    const user = await clerkClient.users.getUser(userId);
-
-    if (user.privateMetadata.role !== "admin") {
-      return res.json({ success: false, message: "not authorized" });
+// Simple JWT protect middleware (optional). If no token, request proceeds (public API). 
+// You can enforce by checking and returning 401 instead.
+export const protect = (req, _res, next) => {
+  const auth = req.headers.authorization || ''
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null
+  if (token) {
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret')
+      req.userId = payload.id
+    } catch (e) {
+      // ignore invalid tokens
     }
-
-    next();
-  } catch (error) {
-    return res.json({ success: false, message: "not authorized" });
   }
-};
+  next()
+}
+
+// Admin protection disabled as per requirement
+export const protectAdmin = (_req, _res, next) => next()

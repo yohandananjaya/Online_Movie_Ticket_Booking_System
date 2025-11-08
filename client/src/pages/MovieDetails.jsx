@@ -1,30 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { dummyDateTimeData, dummyShowsData } from '../assets/assets'
+// Removed dummy data imports; now relying solely on API
+import axios from 'axios'
 import BlurCircle from '../components/BlurCircle'
 import { Heart, PlayCircleIcon, StarIcon } from 'lucide-react'
 import timeFormat from '../lib/timeFormat'
 import DateSelect from '../components/DateSelect'
 import MovieCard from '../components/MovieCard'
 import Loading from '../components/Loading'
+import { useAppContext } from '../context/Appcontext'
 
 
 
 const MovieDetails = () => {
 
   const navigate = useNavigate()
+  const { image_base_url, favoriteMovies, fetchFavoriteMovies, axios, token } = useAppContext()
   const {id} = useParams()
   const [show, setShow] = useState(null)
 
   const getShow = async () => {
-    const show = dummyShowsData.find(show => show._id === id)
-    if(show){
-      setShow({
-        movie: show,
-        dateTime: dummyDateTimeData
-      })
+    try{
+      const {data} = await axios.get(`/api/show/${id}`)
+      if(data.success){
+        setShow({movie: data.movie, dateTime: data.dateTime})
+      } else {
+        // fallback to dummy
+  // fallback removed
+      }
+    }catch(e){
+  // fallback removed
     }
-
   }
   useEffect(() => {
     getShow()
@@ -33,7 +39,7 @@ const MovieDetails = () => {
   return show ? (
     <div className='px-6 md:px-16 lg:px-40 pt-30 md:pt-50'>
       <div className='flex flex-col md:flex-row gap-8 max-w-6xl mx-auto'>
-          <img src={show.movie.poster_path} alt="" className='max-md:mx-auto rounded-xl 
+          <img src={`${image_base_url}${show.movie.poster_path}`} alt="" className='max-md:mx-auto rounded-xl 
           h-104 max-w-70 object-cover'/>
 
           <div className='relative flex flex-col gap-3'>
@@ -57,8 +63,23 @@ const MovieDetails = () => {
                 </button>
               <a href="#dateSelect" className='px-10 py-3 text-sm bg-primary hover:bg-primary-dull
               transition rounded-md font-medium cursor-pointer active:scale-95'>Buy Tickets</a>
-              <button className='bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95'>
-                <Heart className={'w-5 h-5'}/>
+              <button
+                onClick={async ()=>{
+                  if(!token){ return toast.error('Login required') }
+                  try {
+                    const {data} = await axios.post('/api/user/update-favorite',{movieId: show.movie._id})
+                    if(data.success){
+                      await fetchFavoriteMovies()
+                      toast.success('Favorites updated')
+                    } else {
+                      toast.error(data.message || 'Failed')
+                    }
+                  } catch (e){
+                    toast.error('Failed to update favorite')
+                  }
+                }}
+                className='bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95'>
+                <Heart className={`w-5 h-5 ${favoriteMovies.some(m=> (m._id||m.id) === show.movie._id) ? 'text-primary fill-primary' : ''}`}/>
               </button>
             </div>
           </div>
@@ -69,7 +90,7 @@ const MovieDetails = () => {
             <div className='flex items-center gap-4 w-max px-4'>
               {show.movie.casts.slice(0, 12).map((cast,index) => (
                 <div key={index} className='flex flex-col items-center text-center '>
-                  <img src={cast.profile_path} alt="" className='rounded-full h-20 md:h-20 
+                  <img src={`${image_base_url}${cast.profile_path}`} alt="" className='rounded-full h-20 md:h-20 
                   aspect-square object-cover'/>
                   <p className='font-medium text-xs mt-3'>{cast.name}</p>
                 </div>
@@ -81,7 +102,7 @@ const MovieDetails = () => {
 
         <p className='text-lg font-medium mt-20 mb-8'>You May Also Like</p>
         <div className='grid gap-8 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4'>
-          {dummyShowsData.slice(0,4).map((movie,index) => (
+          {(show.movie?.similar || []).slice(0,4).map((movie,index) => (
             <MovieCard key={index} movie={movie} />
           ))}
 

@@ -21,7 +21,7 @@ const checkSeatsAvailability = async (showId, selectedSeats)=> {
 export const createBooking = async (req , res)=>{
 
     try {
-        const {userId} = req.auth();
+        const userId = req.userId; // set by JWT middleware (optional for public booking?)
         const {showId, selectedSeats} = req.body;
         const {origin} = req.headers;
         //check if the seat is available for the selected show
@@ -29,6 +29,9 @@ export const createBooking = async (req , res)=>{
 
         if(!isAvailable){
             return res.json({success: false, message: "Selected Seats are not available"})
+        }
+        if(!userId){
+            return res.json({success:false, message:'Login required'})
         }
         // Get the show details
         const showData = await Show.findById(showId).populate('movie');
@@ -41,7 +44,7 @@ export const createBooking = async (req , res)=>{
             bookedSeats: selectedSeats 
         })
 
-        selectedSeats.map((seat)=>{
+        selectedSeats.forEach((seat)=>{
             showData.occupiedSeats[seat] = userId;
         })
         showData.markModified('occupiedSeats');
@@ -68,5 +71,29 @@ export const getOccupiedSeats = async (req, res)=>{
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
+    }
+}
+
+// Mark a booking as paid (simulate successful payment)
+export const markBookingPaid = async (req, res) => {
+    try{
+        const userId = req.userId
+        if(!userId){
+            return res.status(401).json({success:false, message:'Login required'})
+        }
+        const { bookingId } = req.params
+        const booking = await Booking.findOne({_id: bookingId, user: userId})
+        if(!booking){
+            return res.status(404).json({success:false, message:'Booking not found'})
+        }
+        if(booking.isPaid){
+            return res.json({success:true, message:'Already paid'})
+        }
+        booking.isPaid = true
+        await booking.save()
+        res.json({success:true, message:'Payment successful'})
+    }catch(error){
+        console.log(error.message)
+        res.json({success:false, message:error.message})
     }
 }
