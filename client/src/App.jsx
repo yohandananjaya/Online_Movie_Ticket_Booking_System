@@ -42,7 +42,7 @@ const App = () => {
         <Route path='/movies/:id' element={<MovieDetails />} />
         <Route path='/movies/:id/:date' element={<PrivateRoute><SeatLayout /></PrivateRoute>} />
         <Route path='/my-bookings' element={<PrivateRoute><MyBookings /></PrivateRoute>} />
-        <Route path='/favorite' element={<Favorite />} />
+  <Route path='/favorite' element={<PrivateRoute><Favorite /></PrivateRoute>} />
         <Route path='/admin/*' element={<Layout/> }>
           <Route index element ={<Dashboard/>}/>
           <Route path="add-shows" element={<Addshows/>}/>

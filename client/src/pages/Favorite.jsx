@@ -1,11 +1,27 @@
 // Movies.jsx
-import React from 'react'
+import React, { useEffect } from 'react'
 import MovieCard from '../components/MovieCard'
 import BlurCircle from '../components/BlurCircle'
 import { useAppContext } from '../context/Appcontext'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Favorite = () => {
-  const {favoriteMovies} = useAppContext()
+  const {favoriteMovies, token, initialized} = useAppContext()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(()=>{
+    if(initialized && !token){
+      navigate('/login', { state:{ from: location.pathname }, replace:true })
+    }
+  },[initialized, token])
+
+  if(!initialized){
+    return <div className='pt-40 text-center text-sm text-gray-400'>Loading...</div>
+  }
+  if(!token){
+    return null
+  }
   return favoriteMovies.length > 0 ? (
     <div className="relative my-40 mb-60 px-6 md:px-16 lg:px-40 xl:px-44 overflow-hidden min-h-[80vh]">
       <BlurCircle top="150px" left="0px"/>

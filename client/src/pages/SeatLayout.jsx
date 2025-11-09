@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Loading from '../components/Loading'
 import { ArrowRightIcon, ClockIcon } from 'lucide-react'
@@ -7,6 +7,7 @@ import isoTimeFormat from '../lib/isoTimeFormat'
 import BlurCircle from '../components/BlurCircle'
 import toast from 'react-hot-toast'
 import axios from 'axios'
+import { useAppContext } from '../context/Appcontext'
 
 const SeatLayout = () => {
 
@@ -21,6 +22,8 @@ const SeatLayout = () => {
   const [bookingLoading, setBookingLoading] = useState(false)
 
    const navigate = useNavigate()
+   const location = useLocation()
+   const { token } = useAppContext()
 
    const getShow = async() => {
      try{
@@ -104,8 +107,12 @@ const SeatLayout = () => {
     try{
       if(!selectedTime?.showId) return toast('Select timing first')
       if(selectedSeats.length===0) return toast('Select seats')
+      if(!token){
+        toast('Please login to continue')
+        navigate('/login', { state: { from: location.pathname } })
+        return
+      }
       setBookingLoading(true)
-      const token = localStorage.getItem('token')
       const {data} = await axios.post('/api/booking/create',{showId: selectedTime.showId, selectedSeats},{headers:{Authorization:`Bearer ${token}`}})
       if(data.success){
         toast.success('Booked successfully')
@@ -162,9 +169,9 @@ const SeatLayout = () => {
         </div>
         </div>
 
-        <button onClick={createBooking} disabled={bookingLoading} className='flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-primary
+        <button onClick={createBooking} disabled={bookingLoading || !selectedTime || selectedSeats.length===0} className='flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-primary
         hover:bg-primary-dull disabled:opacity-40 transition rounded-full font-medium cursor-pointer active:scale-95'>
-          {bookingLoading ? 'Booking...' : 'Proceed to Checkout'}
+          {bookingLoading ? 'Booking...' : token ? 'Proceed to Checkout' : 'Login to Book'}
           <ArrowRightIcon strokeWidth={3} className="w-4 h-4"/>
         </button>
         
