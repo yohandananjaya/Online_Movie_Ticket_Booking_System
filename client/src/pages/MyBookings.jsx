@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../context/Appcontext'
-// Removed dummyBookingData; will fetch real bookings
 import Loading from '../components/Loading'
 import BlurCircle from '../components/BlurCircle'
 import timeFormat from '../lib/timeFormat'
@@ -9,28 +8,35 @@ import { dateFormat } from '../lib/dateFormat'
 const MyBookings = () => {
 
   const currency = import.meta.env.VITE_CURRENCY 
-  const { image_base_url, axios } = useAppContext()
+  const { image_base_url, axios, token, initialized } = useAppContext()
 
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const { token } = useAppContext()
-
-  const getMyBookings = async () => {
-    try {
-      const { data } = await axios.get('/api/user/bookings')
-      if (data.success) {
-        setBookings(data.bookings)
-      }
-    } catch (e) {
-      // ignore; UI will show empty state
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   useEffect(() => {
-    getMyBookings()
-  }, [])
+    if(!initialized) return
+    if(!token){
+      setBookings([])
+      setIsLoading(false)
+      return
+    }
+    const load = async () => {
+      setIsLoading(true)
+      try {
+        const { data } = await axios.get('/api/user/bookings')
+        if (data.success) {
+          setBookings(data.bookings)
+        } else {
+          setBookings([])
+        }
+      } catch (e) {
+        setBookings([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    load()
+  }, [axios, token, initialized])
 
   return !isLoading ? (
     <div className='relative px-6 md:px-16 lg:px-40 pt-30 md:pt-40 min-h-[80vh]'>

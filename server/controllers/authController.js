@@ -40,3 +40,20 @@ export const login = async (req, res) => {
     res.json({success:false, message:'Login failed'})
   }
 }
+
+export const currentUser = async (req, res) => {
+  try {
+    const userId = req.userId
+    if(!userId){
+      return res.status(401).json({success:false, message:'Authentication required'})
+    }
+    const user = await User.findById(userId)
+    if(!user){
+      return res.status(404).json({success:false, message:'User not found'})
+    }
+    res.json({success:true, user:{id:user._id, name:user.name, email:user.email}})
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({success:false, message:'Failed to fetch user'})
+  }
+}

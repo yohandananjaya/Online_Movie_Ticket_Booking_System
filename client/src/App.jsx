@@ -23,7 +23,7 @@ const PrivateRoute = ({children}) => {
   const { token, initialized } = useAppContext()
   const location = useLocation()
   if(!initialized) return <Loading />
-  if(!token) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  if(!token) return <Navigate to="/login" state={{ from: location }} replace />
   return children
 }
 

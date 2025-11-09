@@ -23,7 +23,7 @@ const SeatLayout = () => {
 
    const navigate = useNavigate()
    const location = useLocation()
-   const { token } = useAppContext()
+  const { token, initialized } = useAppContext()
 
    const getShow = async() => {
      try{
@@ -103,6 +103,12 @@ const SeatLayout = () => {
     }
   },[selectedTime])
 
+  useEffect(()=>{
+    if(initialized && !token){
+      navigate('/login', { state: { from: location.pathname }, replace: true })
+    }
+  },[initialized, token, navigate, location.pathname])
+
   const createBooking = async ()=>{
     try{
       if(!selectedTime?.showId) return toast('Select timing first')
@@ -113,7 +119,7 @@ const SeatLayout = () => {
         return
       }
       setBookingLoading(true)
-      const {data} = await axios.post('/api/booking/create',{showId: selectedTime.showId, selectedSeats},{headers:{Authorization:`Bearer ${token}`}})
+  const {data} = await axios.post('/api/booking/create',{showId: selectedTime.showId, selectedSeats})
       if(data.success){
         toast.success('Booked successfully')
         navigate('/my-bookings')

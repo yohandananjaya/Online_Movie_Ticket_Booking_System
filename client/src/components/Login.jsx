@@ -3,6 +3,7 @@ import { useAppContext } from '../context/Appcontext'
 import { assets } from '../assets/assets'
 import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useLocation } from 'react-router-dom'
 
 const Login = () => {
         const [state, setState] = useState("login");
@@ -12,6 +13,13 @@ const Login = () => {
     const [confirm, setConfirm] = useState("");
     const [showPwd, setShowPwd] = useState(false);
         const {login, register} = useAppContext()
+    const location = useLocation()
+    const fromState = location.state?.from
+    const redirectTo = typeof fromState === 'string'
+        ? fromState
+        : fromState?.pathname
+        ? `${fromState.pathname}${fromState.search || ''}${fromState.hash || ''}`
+        : undefined
 
         const onSubmit = (e)=>{
             e.preventDefault()
@@ -20,9 +28,9 @@ const Login = () => {
                     toast.error('Passwords do not match')
                     return;
                 }
-                register(name, email, password)
+                register(name, email, password, redirectTo)
             } else {
-                login(email, password)
+                login(email, password, redirectTo)
             }
         }
 
