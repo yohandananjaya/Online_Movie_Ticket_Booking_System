@@ -12,8 +12,8 @@ EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 FROM base AS build
-ENV NODE_ENV=production
-RUN npm ci
+# Install devDependencies for build (Vite + plugins live in dev deps)
+RUN npm ci --include=dev
 COPY . .
 ARG VITE_BASE_URL=/api
 ARG VITE_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p/original
