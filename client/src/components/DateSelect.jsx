@@ -10,13 +10,9 @@ const DateSelect = ({dateTime, id}) => {
   const [selected, setSelected] = useState(null)
 
     const navigate = useNavigate();
-  const { token, initialized } = useAppContext()
+  const { token } = useAppContext()
 
   const onBookHandler = () => {
-    if(!initialized){
-      toast('Please wait a moment...')
-      return
-    }
         if(!selected){
             return toast("Please select a date")
         }
