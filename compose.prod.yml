@@ -13,11 +13,8 @@ services:
       - network
 
   backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-      target: production
-    image: movie-booking-backend:latest
+    image: yohan2001/online_movie_ticket_booking_system-backend:latest
+    container_name: backend
     restart: always
     ports:
       - "5000:5000"
@@ -29,20 +26,13 @@ services:
       - mongodb
     networks:
       - network
-    expose:
-      - "5000"
 
   frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-      target: production
-      args:
-        VITE_BASE_URL: /api
-    image: movie-booking-frontend:latest
+    image: yohan2001/online_movie_ticket_booking_system-frontend:latest
+    container_name: frontend
     restart: always
     ports:
-      - "8080:80"
+      - "3000:80" 
     depends_on:
       - backend
     networks:
