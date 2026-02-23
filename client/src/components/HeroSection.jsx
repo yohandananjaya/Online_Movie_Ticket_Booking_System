@@ -16,7 +16,7 @@ const HeroSection = () => {
         <img src={assets.marvelLogo} alt="" className="max-h-11 lg:h-11 mt-20"/>
 
         <h1 className='text-5xl md:text-[70px] md:leading-18 font-semibold max-w-110'>
-            Deadpool <br/> & Wolverine
+            BatMan <br/> & Wolverine
         </h1>
 
         <div className='flex items-center gap-4 text-gray-300'>
